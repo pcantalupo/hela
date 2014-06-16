@@ -8,10 +8,20 @@ sub new{
 	my $self = {};
 	$self->{'genome'} = shift;
 	foreach my $m (@_){
-		my ($index,$bp) = ($m =~ /(\d+)(\w)/);
-		$self->{'mut'}{$index}{'bp'} = $bp;
-		$self->{'mut'}{$index}{'delta'} = 0;
-		$self->{'mut'}{$index}{'total'} = 0;
+		next if ($m =~ /^#/);
+		my ($index,$bp);
+		if ($m =~ /^(\d+)([TCGA])$/) {
+			$index = $1;
+			$bp = $2;
+			$self->{'mut'}{$index}{'bp'} = $bp;
+			$self->{'mut'}{$index}{'delta'} = 0;
+			$self->{'mut'}{$index}{'total'} = 0;
+		}
+		else {
+			$m =~ /^(\d+)-(\d+)/;
+			$self->{mut}{range}{start} = $1;
+			$self->{mut}{range}{end}   = $2;
+		}
 	}
 	bless $self, $class;
 	return $self;
@@ -26,10 +36,12 @@ sub BamSearch{
 		my @cols = split "\t", $l;
 		my $r5p = $cols[3];
 		my $r3p = $cols[3]+length($cols[9])-1;
-		$self->{'mut'}{'gt2500'}{'delta'}++ if $r5p > 2500;
-		$self->{'mut'}{'gt2500'}{'total'}++;
+		#$self->{'mut'}{'gt2500'}{'delta'}++ if $r5p > 2500;
+		#$self->{'mut'}{'gt2500'}{'total'}++;
+		$self->{mut}{range}{delta}++ if ($r5p >= $self->{mut}{range}{start} && $r3p <= $self->{mut}{range}{end});
+		$self->{mut}{range}{total}++;
 		foreach my $m (keys %{$self->{'mut'}}){
-			next if $m eq 'gt2500';
+			next if $m eq 'range';
 			if($m >= $r5p && $m <= $r3p){
 				my @read = split '',$cols[9];
 				my $m5p = $m-$r5p;
