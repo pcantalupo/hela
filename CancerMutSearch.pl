@@ -43,7 +43,7 @@ if(defined($folder)){
 	foreach my $f (@files){
 		next if $f !~ /\w{8}\-\w{4}\-\w{4}\-\w{4}\-\w{12}/;
 		my $bamSearch = new BamMutSearch($genome,@mutations);
-		$bamSearch->BamSearch("$folder/$f/vrs_pipeline/ppr.qc.fq.vrs.filt.bam");
+		$bamSearch->BamSearch("$folder/$f/vrs_pipeline/ppr.qc.fq.vrs.hg19.bam");
 		$bam{$f} = $bamSearch->get('mut');
 	}
 }
